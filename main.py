@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
+from torchvision.models.densenet import DenseNet
 import torch.backends.cudnn as cudnn
 
 import torchvision
@@ -38,25 +38,25 @@ transform_test = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 
-bs = 16
-nw = 0
-
+batch_size = 128
+num_workers = 4
 
 trainset = torchvision.datasets.CIFAR10(root='../data', train=True, download=True, transform=transform_train)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=bs, shuffle=True, num_workers=nw)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 testset = torchvision.datasets.CIFAR10(root='../data', train=False, download=True, transform=transform_test)
-testloader = torch.utils.data.DataLoader(testset, batch_size=bs, shuffle=False, num_workers=nw)
+testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Model
-print('==> Building model..')
-# net = VGG('VGG19')
+print('==> Building model.. torch official torchvision.models.densenet.densenet121')
+net = torchvision.models.densenet.densenet121()
+# net = VGG('VGG16')
 # net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
-net = DenseNet121()
+# net = DenseNet121()
 # net = ResNeXt29_2x64d()
 # net = MobileNet()
 # net = MobileNetV2()
@@ -81,7 +81,7 @@ if args.resume:
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
-scheduler = MultiStepLR(optimizer, milestones=[150, 250], gamma=0.1)
+scheduler = MultiStepLR(optimizer, milestones=[100, 150], gamma=0.1)
 
 
 # Training
@@ -95,10 +95,10 @@ def train(epoch):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = net(inputs)
-        print(outputs.dtype)
-        print(outputs.size())
-        print(targets.dtype)
-        print(targets.size())
+        # print(outputs.dtype)
+        # print(outputs.size())
+        # print(targets.dtype)
+        # print(targets.size())
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -108,7 +108,7 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        if batch_idx % 100 == 0 or batch_idx == len(trainloader):
+        if batch_idx % 100 == 0 or batch_idx == len(trainloader) - 1:
             print(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)' % (
                 train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
@@ -130,7 +130,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            if batch_idx % 20 == 0 or batch_idx == len(testloader):
+            if batch_idx % 20 == 0 or batch_idx == len(testloader) - 1:
                 print(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                       % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
@@ -149,7 +149,7 @@ def test(epoch):
         best_acc = acc
 
 
-for epoch in range(start_epoch, start_epoch + 350):
-    scheduler.step()
+for epoch in range(start_epoch, start_epoch + 200):
     train(epoch)
     test(epoch)
+    scheduler.step()
