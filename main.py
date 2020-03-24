@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.models.densenet import DenseNet
 import torch.backends.cudnn as cudnn
 
 import torchvision
@@ -51,7 +50,7 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # Model
 print('==> Building model.. torch official torchvision.models.densenet.densenet121')
-net = torchvision.models.densenet.densenet121()
+net = torchvision.models.densenet.densenet121(drop_rate=0, num_classes=10)
 # net = VGG('VGG16')
 # net = ResNet18()
 # net = PreActResNet18()
@@ -81,7 +80,7 @@ if args.resume:
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
-scheduler = MultiStepLR(optimizer, milestones=[100, 150], gamma=0.1)
+scheduler = MultiStepLR(optimizer, milestones=[150, 250], gamma=0.1)
 
 
 # Training
@@ -149,7 +148,7 @@ def test(epoch):
         best_acc = acc
 
 
-for epoch in range(start_epoch, start_epoch + 200):
+for epoch in range(start_epoch, start_epoch + 350):
     train(epoch)
     test(epoch)
     scheduler.step()
