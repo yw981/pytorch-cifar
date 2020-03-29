@@ -12,6 +12,8 @@
 *.pth
 *.pth.*
 *.ckpt.*
+**/softmax_scores*
+result*
 checkpoint
 
 # Byte-compiled / optimized / DLL files
