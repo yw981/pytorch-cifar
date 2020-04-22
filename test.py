@@ -3,6 +3,7 @@ import torch.backends.cudnn as cudnn
 from models import *
 import numpy as np
 import torch.utils.data as data
+import torchvision
 
 
 def test(model, criterion, device, test_loader, tag='Test', save_result=False, save_file_path='./result.txt'):
@@ -18,8 +19,7 @@ def test(model, criterion, device, test_loader, tag='Test', save_result=False, s
             # print(data.size())
             # print(target.size())
             output = model(data)
-            # test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            # test_loss += F.cross_entropy(output, target, reduction='sum').item()  # sum up batch loss
+
             batch_loss = criterion(output, target).item()
             test_loss += batch_loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
@@ -57,7 +57,7 @@ class RandomDataset(data.Dataset):
         self.labels = np.zeros((10000,)).astype(np.int64)
 
     def __getitem__(self, index):
-        img,target = self.data[index],self.labels[index]
+        img, target = self.data[index], self.labels[index]
         # 此处应该是(H x W x C)，因此调整
         # img = img.transpose(1, 2, 0)
 
@@ -83,9 +83,15 @@ if __name__ == '__main__':
     # net = DenseNet121().to(device)
     # Test set: Average loss: 0.0010, Accuracy: 9516 / 10000(95 %)
 
+    # Python 官方 densenet 自训练 cifar10
+    model_path = '../model/of_densenet_cifar10.pth'
+    net = torchvision.models.densenet.densenet121(drop_rate=0.2,
+                                                  num_classes=10
+                                                  ).to(device)
+
     # vgg16 自训练 cifar10
-    model_path = '../model/vgg16_cifar10.pth'
-    net = VGG('VGG16').to(device)
+    # model_path = '../model/vgg16_cifar10.pth'
+    # net = VGG('VGG16').to(device)
     # Test set: Average loss: 0.0015, Accuracy: 9337 / 10000(93 %)
 
     if use_cuda:
@@ -121,11 +127,11 @@ if __name__ == '__main__':
     #     batch_size=batch_size, shuffle=False, num_workers=4)
 
     # test(model,criterion, device, train_loader,'Train')
-    # test(net, criterion, device, test_loader)
+    test(net, criterion, device, test_loader)
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_densenet_imagenet.npy')
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_densenet_gaussian.npy')
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_densenet_uniform.npy')
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_vgg_imagenet.npy')
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_vgg_gaussian.npy')
     # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_vgg_uniform.npy')
-    test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_vgg_cifar.npy')
+    # test(net, criterion, device, test_loader, save_result=True, save_file_path='result/result_vgg_cifar.npy')

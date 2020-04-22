@@ -49,10 +49,11 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Model
-print('==> Building model.. torch official torchvision.models.densenet.densenet121')
-net = torchvision.models.densenet.densenet121(drop_rate=0, num_classes=10)
+print('==> Building model.. of dense 121')
+net = torchvision.models.densenet.densenet121(drop_rate=0.2, num_classes=10)
 # net = VGG('VGG16')
 # net = ResNet18()
+# net = ResNet50()
 # net = PreActResNet18()
 # net = GoogLeNet()
 # net = DenseNet121()
@@ -78,9 +79,10 @@ if args.resume:
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
 
+
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
-scheduler = MultiStepLR(optimizer, milestones=[150, 250], gamma=0.1)
+scheduler = MultiStepLR(optimizer, milestones=[50, 100], gamma=0.1)
 
 
 # Training
@@ -148,7 +150,7 @@ def test(epoch):
         best_acc = acc
 
 
-for epoch in range(start_epoch, start_epoch + 350):
+for epoch in range(start_epoch, start_epoch + 50):
     train(epoch)
     test(epoch)
     scheduler.step()

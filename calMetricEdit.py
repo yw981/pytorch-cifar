@@ -270,13 +270,15 @@ def cal_metric(in_file_path, out_file_path):
     # print('auroc in', start, ',', end)
     gap = (end - start) / 100000
     # tpr95
-
+    # auroc
     aurocValue = 0.0
     fprTemp = 1.0
+    # aupr in
+
+    # cal(in_softmax_scores,out_softmax_scores,start, end, gap)
+
     for delta in np.arange(start, end, gap):
         # tpr95
-
-
         tpr = np.sum(np.sum(in_softmax_scores >= delta)) / np.float(len(in_softmax_scores))
         fpr = np.sum(np.sum(out_softmax_scores > delta)) / np.float(len(out_softmax_scores))
         aurocValue += (-fpr + fprTemp) * tpr
@@ -303,6 +305,8 @@ def metric(nn, data):
     aurocBase, aurocNew = auroc(indis)
     auprinBase, auprinNew = auprIn(indis)
     auproutBase, auproutNew = auprOut(indis)
+    # fprBase, errorBase,aurocBase, auprinBase, auproutBase = cal_metric()
+
     print("{:31}{:>22}".format("Neural network architecture:", nnStructure))
     print("{:31}{:>22}".format("In-distribution dataset:", indis))
     print("{:31}{:>22}".format("Out-of-distribution dataset:", dataName))
