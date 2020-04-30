@@ -78,16 +78,25 @@ if __name__ == '__main__':
     kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
     batch_size = 200
 
+    # Robust OOD提供的densenet 自训练 cifar10
+    normalizer = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
+    net = DenseNet3(100, 10, normalizer=normalizer).to(device)
+    model_path = '../model/rood_densenet_cifar10_ep100.pth'
+    checkpoint = torch.load(model_path)
+    net.load_state_dict(checkpoint['state_dict'])
+    # 此模型训练和测试时输入的图像不需要被dataLoader来Normalize，而是DenseNet模型来处理（也Normalize了）
+    # Test set: Average loss: 0.0012, Accuracy: 9448/10000 (94%)
+
     # densenet 自训练 cifar10
     # model_path = '../model/densenet121_cifar.pth'
     # net = DenseNet121().to(device)
     # Test set: Average loss: 0.0010, Accuracy: 9516 / 10000(95 %)
 
     # Python 官方 densenet 自训练 cifar10
-    model_path = '../model/of_densenet_cifar10.pth'
-    net = torchvision.models.densenet.densenet121(drop_rate=0.2,
-                                                  num_classes=10
-                                                  ).to(device)
+    # model_path = '../model/of_densenet_cifar10.pth'
+    # net = torchvision.models.densenet.densenet121(drop_rate=0.2,
+    #                                               num_classes=10
+    #                                               ).to(device)
 
     # vgg16 自训练 cifar10
     # model_path = '../model/vgg16_cifar10.pth'
@@ -98,16 +107,17 @@ if __name__ == '__main__':
         net = torch.nn.DataParallel(net)
         cudnn.benchmark = True
 
-    checkpoint = torch.load(model_path)
-    net.load_state_dict(checkpoint['net'])
-    best_acc = checkpoint['acc']
-    start_epoch = checkpoint['epoch']
-    print(model_path, ' epoch ', start_epoch, ' acc ', best_acc)
+    # Robust OOD的模型不需要这段
+    # checkpoint = torch.load(model_path)
+    # net.load_state_dict(checkpoint['net'])
+    # best_acc = checkpoint['acc']
+    # start_epoch = checkpoint['epoch']
+    # print(model_path, ' epoch ', start_epoch, ' acc ', best_acc)
 
     # cifar10 数据
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+        # transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
     ])
     # 若不Normalize Test set: Average loss: 0.0063, Accuracy: 7169 / 10000(72 %)
     test_loader = torch.utils.data.DataLoader(

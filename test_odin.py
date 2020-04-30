@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import torchvision
 import time
-from models import DenseNet121, VGG
+from models import DenseNet3, VGG
 import torch.backends.cudnn as cudnn
 
 
@@ -13,8 +13,8 @@ def cal_scores_save(base_path, new_path, model, criterion, device, test_loader, 
     use_gradient = True
     f1 = open(base_path, 'w')
     g1 = open(new_path, 'w')
-    temper = 200
-    noiseMagnitude1 = 0.000064
+    temper = 1000
+    noiseMagnitude1 = 0.0014
 
     print('Process ', tag, ' temperature = ', temper, ' epsilon = ', noiseMagnitude1)
 
@@ -107,10 +107,17 @@ if __name__ == '__main__':
     num_worker = 2
 
     # 模型！
+    # Robust OOD提供的densenet 自训练 cifar10
+    normalizer = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
+    net = DenseNet3(100, 10, normalizer=normalizer)
+    model_path = '../model/rood_densenet_cifar10_ep100.pth'
+    checkpoint = torch.load(model_path)
+    net.load_state_dict(checkpoint['state_dict'])
+    # Test set: Average loss: 0.0012, Accuracy: 9448/10000 (94%)
 
     # densenet 自训练 cifar10
-    model_path = '../model/densenet121_cifar.pth'
-    net = DenseNet121().to(device)
+    # model_path = '../model/densenet121_cifar.pth'
+    # net = DenseNet121().to(device)
     # Test set: Average loss: 0.0010, Accuracy: 9516 / 10000(95 %)
 
     # Python 官方 densenet 自训练 cifar10
@@ -128,16 +135,16 @@ if __name__ == '__main__':
         net = torch.nn.DataParallel(net)
         cudnn.benchmark = True
 
-    checkpoint = torch.load(model_path)
-    net.load_state_dict(checkpoint['net'])
-    best_acc = checkpoint['acc']
-    start_epoch = checkpoint['epoch']
-    print(model_path, ' epoch ', start_epoch, ' acc ', best_acc)
+    # checkpoint = torch.load(model_path)
+    # net.load_state_dict(checkpoint['net'])
+    # best_acc = checkpoint['acc']
+    # start_epoch = checkpoint['epoch']
+    # print(model_path, ' epoch ', start_epoch, ' acc ', best_acc)
 
     # cifar10 数据
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+        # transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
     ])
     # 若不Normalize Test set: Average loss: 0.0063, Accuracy: 7169 / 10000(72 %)
     test_loader = torch.utils.data.DataLoader(
