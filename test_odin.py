@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # 模型！
     # Robust OOD提供的densenet 自训练 cifar10
     normalizer = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
-    net = DenseNet3(100, 10, normalizer=normalizer)
+    net = DenseNet3(100, 10, normalizer=normalizer).to(device)
     model_path = '../model/rood_densenet_cifar10_ep100.pth'
     checkpoint = torch.load(model_path)
     net.load_state_dict(checkpoint['state_dict'])
