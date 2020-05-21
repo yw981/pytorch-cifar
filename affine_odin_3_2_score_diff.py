@@ -125,7 +125,8 @@ def evaluate_score(tag, in_data, out_data, is_diff=False):
     # print(tag, ' error ', detection(in_data, out_data))
     # print(tag, ' AUROC ', auroc(in_data, out_data))
     # print(tag, ' AUPR in ', auprIn(in_data, out_data))
-    str = "{} error : {:8.2f}% FPR at TPR95 : {:8.2f}% AUROC : {:>8.2f}% AUPR in : {:>8.2f}% "
+    # str = "{} error : {:8.2f}% FPR at TPR95 : {:8.2f}% AUROC : {:>8.2f}% AUPR in : {:>8.2f}% "
+    str = "{} , {}, {}, {}, {} "
     print(str.format(tag,
                      detection(in_data,
                                out_data,
