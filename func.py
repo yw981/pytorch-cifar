@@ -1,7 +1,7 @@
 import numpy as np
 
 # RESULT_DIR = './result_affine_odin'
-RESULT_DIR = './result_affine'
+RESULT_DIR = './result'
 # RESULT_DIR = './result_large'
 
 
